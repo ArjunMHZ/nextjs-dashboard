@@ -1,10 +1,15 @@
 import { sql } from '@vercel/postgres';
 import {
+  Category,
+  CategoryField,
   CustomerField,
   CustomersTableType,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
+  Product,
+  ProductsCategoryList,
+  ProductsTable,
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
@@ -12,14 +17,13 @@ import { formatCurrency } from './utils';
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+    console.log('Data fetch completed after 3 seconds.');
 
     return data.rows;
   } catch (error) {
@@ -36,6 +40,10 @@ export async function fetchLatestInvoices() {
       JOIN customers ON invoices.customer_id = customers.id
       ORDER BY invoices.date DESC
       LIMIT 5`;
+
+    if (!data.rows) {
+      throw new Error('No rows returned from query');
+    }
 
     const latestInvoices = data.rows.map((invoice) => ({
       ...invoice,
@@ -213,5 +221,127 @@ export async function fetchFilteredCustomers(query: string) {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch customer table.');
+  }
+}
+
+
+export async function fetchCategories() {
+  try {
+    const data = await sql<CategoryField>`
+    SELECT id, name FROM categories ORDER BY name ASC
+    `;
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch categories.');
+  }
+}
+
+
+export async function fetchCategoryByName(productId: string) {
+  try {
+    const data = await sql<Category>`
+    SELECT categories.id, categories.name, categories.description FROM categories WHERE categories.id = ${productId}`;
+
+    return data.rows[0];
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch category by its name.');
+  }
+}
+
+
+export async function fetchProducts(productCategory: string) {
+  try {
+    const data = await sql<ProductsCategoryList>`   
+      SELECT products.id, products.name, products.price, products.image_url, categories.description
+      FROM products
+      JOIN categories ON products.category_id = categories.id
+      WHERE categories.name = ${productCategory}
+    `;
+
+    return data.rows;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all the products according to its category.');
+  }
+}
+
+export async function fetchProductByName(id: string) {
+  try {
+    const data = await sql<Product>`   
+    SELECT products.id, products.name, products.price, products.image_url, products.description, products.category_id
+    FROM products
+    WHERE products.id = ${id}
+    LIMIT 1
+  `;
+
+
+    const product = data.rows.map((product) => ({
+      ...product,
+      // Convert amount from cents to dollars
+      // amount: invoice.amount / 100,
+    }));
+
+    return product[0];
+
+    // if (Array.isArray(data) && data.length > 0) {
+    //   return data[0]; // Return the first product if it exists here should be data.rows
+    // }
+
+    // return null;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch product by its name.');
+  }
+}
+
+
+
+export async function fetchFilteredProducts(
+  query: string,
+  currentPage: number,
+) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const products = await sql<ProductsTable>`
+      SELECT
+        products.id,
+        products.name,
+        products.price,
+        products.image_url,
+        products.description,
+        categories.name AS category_name
+      FROM products
+      JOIN categories ON products.category_id = categories.id
+      WHERE
+        products.name ILIKE ${`%${query}%`} OR
+        categories.name ILIKE ${`%${query}%`} OR
+        products.price::text ILIKE ${`%${query}%`} OR
+        products.description ILIKE ${`%${query}%`}
+      ORDER BY products.name ASC  
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    return products.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch products.');
+  }
+}
+
+export async function trendingProducts() {
+  try {
+    const data = await sql<Product>`
+      SELECT * FROM products 
+      WHERE category_id IN ('134bfccf-d58e-4ba5-9562-f8c327858c6d', 'be2c78c7-08f8-4e93-b384-2424170489b9', '29f08011-2984-4a8d-9cc8-341e6fbee6c3') 
+      LIMIT 4;
+    `;
+
+    return data.rows;
+  } catch (error) {
+    console.error("Database Error: ", error);
+    throw new Error('Failed to fetch trending products.');
   }
 }

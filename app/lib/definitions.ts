@@ -1,13 +1,23 @@
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
 export type User = {
   id: string;
   name: string;
   email: string;
   password: string;
+  role: 'user' | 'admin';
 };
+
+
+export interface AdapterUser {
+  id: string;
+  email: string;
+  emailVerified: Date | null;
+  name: string | null;
+  image: string | null;
+  role: 'user' | 'admin';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 
 export type Customer = {
   id: string;
@@ -80,9 +90,49 @@ export type CustomerField = {
   name: string;
 };
 
+
 export type InvoiceForm = {
   id: string;
   customer_id: string;
   amount: number;
   status: 'pending' | 'paid';
 };
+
+export type ProductsCategoryList = {
+  id: string;
+  category_id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  price: number;
+}
+
+export type Product = {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  price: number;
+  category_id: string;
+}
+
+export type ProductsTable = {
+  id: string;
+  category_id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  price: number;
+  category_name: string;
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export type CategoryField = {
+  id: string;
+  name: string;
+}
