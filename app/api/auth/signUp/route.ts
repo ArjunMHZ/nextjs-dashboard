@@ -1,5 +1,7 @@
 // app/api/auth/signUp/route.ts
 
+export const runtime = "nodejs";
+
 import { sql } from '@vercel/postgres'; // PostgreSQL connection
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
