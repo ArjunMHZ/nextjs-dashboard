@@ -6,7 +6,8 @@ import { NextAuthConfig } from "next-auth";
 import { User } from "./app/lib/definitions";
 import { sql } from "@vercel/postgres";
 import { z } from 'zod';
-import { compare, hash } from "bcryptjs";
+// import { compare, hash } from "bcryptjs";
+import bcrypt from "bcrypt";
 
 const publicRoutes = ["/sign-in", "/sign-up"];
 const authRoutes = ["/sign-in", "/sign-up"];
@@ -39,7 +40,7 @@ export const authConfig = {
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
           if (!user) return null;
-          const passwordMatch = await compare(password, user.password)
+          const passwordMatch = await bcrypt.compare(password, user.password)
 
           if (passwordMatch) return user;
         }
