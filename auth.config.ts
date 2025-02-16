@@ -1,5 +1,6 @@
 // auth.config.ts
 
+export const runtime = "nodejs";
 import Credentials from 'next-auth/providers/credentials';
 import { NextAuthConfig } from "next-auth";
 import { User } from "./app/lib/definitions";

@@ -14,7 +14,7 @@ interface Product {
     // Add other product properties as needed
 }
 
-export function NoWishlist() {
+export function WishlistPage() {
     return (
         <div className="flex flex-col justify-start items-center md:w-[20%] mt-10 mb-7 pl-4">
             <Image src='/wishlist_empty.svg' alt="notebook skeleton" width={250} height={250} className="mb-8 mt-20"/>
@@ -57,7 +57,7 @@ export default function Page() {
     return (
         <div>
             {wishlist.length === 0 ? (
-                <NoWishlist />
+                <WishlistPage />
             ) : (
                 <>
                     <h2 className='text-xl font-semibold text-slate-600 px-4 py-5 mb-2'>Wishlist</h2>

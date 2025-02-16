@@ -2,14 +2,15 @@ import { auth } from "@/auth";
 import Footer from "@/components/ui/footer";
 import Navbar from "@/components/ui/homepage/navbar";
 
-export const experimental_ppr = true;
+// export const experimental_ppr = true;
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-      const session =  await auth();
-      const username = session?.user?.name;
+    const sessionPromise = auth(); // Start async operation
+    const session = await sessionPromise; // Await it properly
+    const username = session?.user?.name;
     return (
         <div>
-            <Navbar username={username}/>
+            <Navbar username={username} />
             {children}
             <Footer />
         </div>
