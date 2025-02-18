@@ -1,4 +1,4 @@
-export const config = { runtime: 'nodejs', };
+export const runtime = "nodejs";
 import { auth } from "./auth";
 
 export default auth((req) => {
